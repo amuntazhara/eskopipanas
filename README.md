@@ -1,12 +1,12 @@
 # eskopipanas
-composer install
-npm i
-php artisan key:generate
-php artisan migrate
-php artisan db:seed UserSeeder
-php artisan db:seed SubscriptionSeeder
-php artisan db:seed DaftarBOSeeder
-php artisan optimize
+composer install <br />
+npm i <br />
+php artisan key:generate <br />
+php artisan migrate <br />
+php artisan db:seed UserSeeder <br />
+php artisan db:seed SubscriptionSeeder <br />
+php artisan db:seed DaftarBOSeeder <br />
+php artisan optimize <br />
 
 # tab terminal 1 (development/testing)
 npm run dev
