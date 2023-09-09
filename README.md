@@ -8,10 +8,10 @@ php artisan db:seed SubscriptionSeeder
 php artisan db:seed DaftarBOSeeder
 php artisan optimize
 
-# tab cmd 1 (DEVELOPMENT/TESTING)
+# tab terminal 1 (development/testing)
 npm run dev
-# tab cmd 1 (PRODUCTION/BUILD)
+# tab terminal 1 (production/testing)
 npm run build
 
-# tab cmd 2 (DEVELOPMENT/TESTING)
+# tab terminal 2 (development/testing)
 php artisan serve
