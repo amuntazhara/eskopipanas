@@ -19,9 +19,31 @@ body {
 }
 
 .clear {
-    margin-bottom: 10vh;
+    margin-bottom: 8vh;
 }
 
 .row {
     margin: 0 !important;
+}
+
+.v-enter-active,
+.v-leave-active {
+    transition: opacity 0.5s ease;
+}
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
+}
+
+
+.slide-fade-enter-active {
+    transition: all 0.1s ease-out;
+}
+.slide-fade-leave-active {
+    transition: all 0.1s cubic-bezier(1, 1, 1, 1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 1;
 }

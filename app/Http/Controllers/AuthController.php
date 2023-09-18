@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use stdClass;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -67,5 +69,14 @@ class AuthController extends Controller
             $data->subscription = session()->get('subscription');
         }
         return response()->json($data, 200);
+    }
+
+    public function cek_password_bo() {
+        $data = json_decode(request()->data);
+        $user = User::find(session()->get('id_bo'));
+        if (Hash::check($data, $user->password))
+            return response()->json(true, 200);
+        else
+            return response()->json(false, 400);
     }
 }

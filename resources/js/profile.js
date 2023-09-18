@@ -4,9 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './fontawesome6.js'
 
 import { createApp } from 'vue'
-import Main from "@/Vue/Main.vue"
-import App from './Vue/App.vue'
+import App from './Vue/Profile.vue'
 
 createApp(App)
-.component("Main", Main)
 .mount("#app")

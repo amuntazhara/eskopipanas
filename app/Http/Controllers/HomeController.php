@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use DateTime;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -31,6 +30,14 @@ class HomeController extends Controller
             ->select('websites.id AS id', 'domain', 'daftar_bo.nama_bo AS nama_bo', 'kontak')
             ->get();
         return $get;
+    }
+
+    public function bot_check() {
+        $token = "6303246029:AAFLpHSCUa8aR7CWugzjMfAImG4P_AIpwK0";
+        $method = 'getMe';
+        $api_url = "http://api.telegram.org/bot{$token}/{$method}";
+        $res = file_get_contents($api_url);
+        return response()->json($res, 200);
     }
 
     public function add_domain() {
@@ -72,7 +79,6 @@ class HomeController extends Controller
             DB::table('websites')->where('id', $data->idDomain)->update(['domain' => $data->domain]);
             return response()->json('ok', 200);
         }
-        // return response()->json($data->namaBO, 400);
     }
 
     public function delete_domain() {

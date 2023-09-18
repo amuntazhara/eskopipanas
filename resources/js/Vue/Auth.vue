@@ -1,6 +1,6 @@
 <template>
-    <div class="row align-items-center bg-dark m-0" style="height: 100vh">
-        <div class="col-12 p-3">
+    <div class="row align-items-center justify-content-center bg-dark m-0" style="height: 100vh">
+        <div class="col-12 col-md-3 p-3">
             <form @submit.prevent="SubmitLogin">
                 <input type="text" ref="email" class="form-control mb-2" placeholder="Email">
                 <input type="password" ref="password" class="form-control mb-2" placeholder="Password">
