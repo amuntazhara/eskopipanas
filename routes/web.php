@@ -27,6 +27,8 @@ Route::post('/bot_check', [HomeController::class, 'bot_check'])->middleware('aut
 Route::post('/add_domain', [HomeController::class, 'add_domain'])->middleware('auth');
 Route::post('/ubah_domain', [HomeController::class, 'ubah_domain'])->middleware('auth');
 Route::post('/delete_domain', [HomeController::class, 'delete_domain'])->middleware('auth');
+Route::post('/redirect', [HomeController::class, 'redirect'])->middleware('auth');
+Route::post('/bot_check_redirect', [HomeController::class, 'bot_check_redirect'])->middleware('auth');
 
 Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
 Route::get('/get_package', [ProfileController::class, 'get_package'])->middleware('auth');

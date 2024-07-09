@@ -14,22 +14,24 @@ class DaftarBOSeeder extends Seeder
     public function run(): void
     {
         DB::table('daftar_bo')->insert([
-            'nama_bo' => 'admin',
+            'nama_bo' => 'seofreedom',
             'kontak' => '+85517347740',
             'subscribe' => '2030-12-31 23:59:59',
             'paket_subs' => 99,
         ]);
         DB::table('daftar_bo')->insert([
             'nama_bo' => 'Stars77',
-            'kontak' => '+85517347740',
-            'subscribe' => '2023-08-23 17:02:24',
+            'kontak' => '',
+            'subscribe' => '2023-07-23 17:02:24',
             'paket_subs' => 1,
+            'id_telegram' => '',
         ]);
         DB::table('daftar_bo')->insert([
-            'nama_bo' => 'BO Lain',
-            'kontak' => '+85517347740',
-            'subscribe' => '2023-07-23 18:24:15',
+            'nama_bo' => 'Cabemanis88',
+            'kontak' => '',
+            'subscribe' => '2024-07-31 18:24:15',
             'paket_subs' => 1,
+            'id_telegram' => '5685451173',
         ]);
     }
 }

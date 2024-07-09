@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('domain');
             $table->integer('nama_bo');
+            $table->integer('jenis');
+            $table->string('redirector');
         });
     }
 

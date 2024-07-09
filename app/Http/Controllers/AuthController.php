@@ -28,18 +28,21 @@ class AuthController extends Controller
                 if($check_admin == false) {
                     $bo = DB::table('daftar_bo')
                         ->join('users', 'users.nama_bo', '=', 'daftar_bo.id')
-                        ->select('daftar_bo.id AS id_bo', 'daftar_bo.nama_bo AS nama_bo', 'subscribe')
+                        ->join('subscriptions', 'daftar_bo.paket_subs', '=', 'subscriptions.id')
+                        ->select('daftar_bo.id AS id_bo', 'daftar_bo.nama_bo AS nama_bo', 'subscribe', 'id_telegram', 'telegram')
                         ->where('email', $data->email)
                         ->first();
                     session()->put('nama_bo', $bo->nama_bo);
                     session()->put('id_bo', $bo->id_bo);
                     session()->put('subscription', $bo->subscribe);
+                    session()->put('id_telegram', $bo->id_telegram);
+                    session()->put('telegram', $bo->telegram);
+                    session()->put('user', $data->email);
+                    return response()->json(0, 200);
                 } else {
-                    session()->put('nama_bo', 'admin');
-                    session()->put('id_bo', 0);
+                    session()->put('user', $data->email);
+                    return response()->json(1, 200);
                 }
-                session()->put('users', $data->email);
-                return response()->json('OK', 200);
             } else {
                 return response()->json('Email dan Password tidak sesuai.', 400);
             }
@@ -53,7 +56,7 @@ class AuthController extends Controller
 
     private function check_admin($email) {
         $role = DB::table('users')->select('nama_bo')->where('email', $email)->first();
-        if($role->nama_bo == 0) {
+        if($role->nama_bo == 1) {
             return true;
         } else {
             return false;
@@ -65,9 +68,11 @@ class AuthController extends Controller
         $data->subscription = null;
         $data->id_bo = session()->get('id_bo');
         $data->nama_bo = session()->get('nama_bo');
-        if(session()->has('subscription')) {
+        $data->id_telegram = session()->get('id_telegram');
+        $data->telegram = session()->get('telegram');
+        if(session()->has('subscription'))
             $data->subscription = session()->get('subscription');
-        }
+
         return response()->json($data, 200);
     }
 

@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('daftar_bo', function (Blueprint $table) {
+        Schema::create('redirectors', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_bo');
-            $table->string('kontak')->nullable();
-            $table->timestamp('subscribe')->nullable();
-            $table->integer('paket_subs')->nullable();
-            $table->string('id_telegram')->nullable();
+            $table->integer('domain');
+            $table->integer('redirect');
         });
     }
 
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('daftar_bo');
+        Schema::dropIfExists('redirectors');
     }
 };

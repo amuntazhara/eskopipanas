@@ -61,7 +61,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-6 p-0">Durasi Langganan</div>
-                                        <div class="col-6 p-0">{{ durasi }}</div>
+                                        <div class="col-6 p-0">{{ durasi }} Bulan</div>
                                     </div>
                                     <div class="row">
                                         <div class="col-6 p-0">Notifikasi Telegram</div>

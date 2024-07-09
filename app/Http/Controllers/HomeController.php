@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Telegram;
+use App\Http\Controllers\Pagerule;
 use DateTime;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class HomeController extends Controller
 {
@@ -12,36 +15,137 @@ class HomeController extends Controller
     }
 
     public function fetch_data() {
-        $domain = request()->domain;
-        // $url = "https://trustpositif.kominfo.go.id/Rest_server/getrecordsname_home";
-        $url = "https://indiwtf.upset.dev/api/check?domain=$domain";
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($curl);
-        curl_close($curl);
-
-        return json_decode($result);
+        $token = "Zzp4qIaF2g1qZKgiA7lyIMTTPP4Xn3KD";
+        $data = json_decode(request()->data);
+        $data = $data->domain;
+        $result = "";
+        // // $url = "https://trustpositif.kominfo.go.id/Rest_server/getrecordsname_home";
+        if ($data->jenis != 3) {
+            $url = "https://indiwtf.com/api/check?domain=$data->domain&token=$token";
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $res = curl_exec($curl);
+            curl_close($curl);
+            $result = json_decode($res);
+        } else {
+            $data = new stdClass();
+            $status = new stdClass();
+            $status->status = "backup";
+            $data->data = $status;
+            $result = $data->data;
+        }
+        return response()->json($result, 200);
     }
 
     public function get_websites() {
-        $get = DB::table('websites')
-            ->join('daftar_bo', 'websites.nama_bo', '=', 'daftar_bo.id')
-            ->select('websites.id AS id', 'domain', 'daftar_bo.nama_bo AS nama_bo', 'kontak')
-            ->get();
+        if (session()->get('id_bo') == 0) {
+            $get = DB::table('websites')
+                ->join('daftar_bo', 'websites.nama_bo', '=', 'daftar_bo.id')
+                ->select('websites.id AS id', 'domain', 'daftar_bo.nama_bo AS nama_bo', 'kontak', 'websites.jenis')
+                ->where('websites.jenis', 1) // MS Utama
+                ->orWhere('websites.jenis', 2) // Redirector
+                // ->orWhere('websites.jenis', 3) // MS Cadangan
+
+                ->get();
+        } else {
+            $get = DB::table('websites')
+                ->join('daftar_bo', 'websites.nama_bo', '=', 'daftar_bo.id')
+                ->select('websites.id AS id', 'domain', 'daftar_bo.nama_bo AS nama_bo', 'kontak', 'websites.jenis')
+                ->where('websites.nama_bo', session()->get('id_bo'))
+                ->where('websites.jenis', 1) // MS Utama
+                ->orwhere('websites.nama_bo', session()->get('id_bo'))
+                ->where('websites.jenis', 2) // Redirector
+                ->orwhere('websites.nama_bo', session()->get('id_bo'))
+                ->where('websites.jenis', 3) // MS Cadangan
+                ->orderBy('websites.jenis', 'asc')
+                ->get();
+        }
         return $get;
     }
 
     public function bot_check() {
-        $token = "6303246029:AAFLpHSCUa8aR7CWugzjMfAImG4P_AIpwK0";
-        $method = 'getMe';
-        $api_url = "http://api.telegram.org/bot{$token}/{$method}";
-        $res = file_get_contents($api_url);
-        return response()->json($res, 200);
+        $token = "6303246029:AAF50OQAHnNxfiYbNjwTZaDhbpCifMVY4xg";
+        $chat_id = session()->get('id_telegram');
+
+        $data = request()->content;
+        $message = $this->bot_message($data);
+        $telegram = new Telegram($token);
+        $content = array('chat_id' => $chat_id, 'text' => $message, 'parse_mode' => 'HTML');
+        return response()->json($telegram->sendMessage($content), 200);
+    }
+
+    public function bot_tele_redirect($data) {
+        $token = "6303246029:AAF50OQAHnNxfiYbNjwTZaDhbpCifMVY4xg";
+        $chat_id = session()->get('id_telegram');
+
+        $message = "\n<b>INFO REDIRECTOR</b>\n";
+        $message .= $data;
+        $telegram = new Telegram($token);
+        $content = array('chat_id' => $chat_id, 'text' => $message, 'parse_mode' => 'HTML');
+        return response()->json($telegram->sendMessage($content), 200);
+    }
+
+    public function bot_message($data) {
+        $message = "\n<b>===== NAWALA INFO =====</b>\n";
+
+        $message .= "\n<b>MS UTAMA:</b>\n";
+        foreach ($data as $key):
+            if ($key['jenis'] == 1) {
+                // START DEBUG
+                // $key['status'] = 'blocked';
+                // END DEBUG
+                if ($key['status'] == 'allowed') {
+                    $status = '✅ ';
+                } else if ($key['status'] == 'blocked') {
+                    $status = '❌ ';
+                    $cadangan_dipakai = $this->redirect_ms($key);
+                } else if ($key['status'] == 'backup') {
+                    $status = '';
+                } else {
+                    $status = '⚠️ ';
+                }
+                $message .= "$status{$key['domain']}\n";
+            }
+        endforeach;
+        $message .= "\n<b>REDIRECTOR:</b>\n";
+        foreach ($data as $key) :
+            if ($key['jenis'] == 2) {
+                if ($key['status'] == 'allowed') {
+                    $status = '✅ ';
+                } else if ($key['status'] == 'blocked') {
+                    $status = '❌ ';
+                    $this->nawala_redirector($key);
+                } else if ($key['status'] == 'backup') {
+                    $status = '';
+                } else {
+                    $status = '⚠️ ';
+                }
+                $message .= "$status{$key['domain']}\n";
+            }
+        endforeach;
+        $message .= "\n<b>MS CADANGAN:</b>\n";
+        foreach ($data as $key) :
+            if ($key['jenis'] == 3) {
+                if (isset($cadangan_dipakai)) {
+                    if ((int)$key['id'] == $cadangan_dipakai)
+                        $message .= "<i><s>{$key['domain']}</s></i>\n";
+                    else
+                        $message .= "{$key['domain']}\n";
+                } else {
+                    $message .= "{$key['domain']}\n";
+                }
+            }
+        endforeach;
+
+        $message .= "\n======================";
+        return $message;
     }
 
     public function add_domain() {
         $data = json_decode(request()->data);
+        $find = ['http://', 'https://', 'www.', '/'];
+        $domain_name = str_replace($find, '', $data->domain);
         $check_paket = DB::table('daftar_bo')->select('paket_subs', 'subscribe')->where('id', $data->namaBO)->first();
         $detail_sub = DB::table('subscriptions')->select('limit_domain', 'durasi')->where('id', $check_paket->paket_subs)->first();
         $total_domain = DB::table('websites')->where('nama_bo', $data->namaBO)->count();
@@ -57,13 +161,15 @@ class HomeController extends Controller
         } else if ($remaining_days < 0) {
             return response()->json('endsub', 400);
         } else {
-            DB::table('websites')->insert(['domain' => $data->domain, 'nama_bo' => $data->namaBO]);
+            DB::table('websites')->insert(['domain' => $domain_name, 'nama_bo' => $data->namaBO, 'jenis' => $data->jenis]);
             return response()->json('ok', 200);
         }
     }
 
     public function ubah_domain() {
         $data = json_decode(request()->data);
+        $find = ['http://', 'https://', 'www.', '/'];
+        $domain_name = str_replace($find, '', $data->domain);
         $check_paket = DB::table('daftar_bo')->select('paket_subs', 'subscribe')->where('id', $data->namaBO)->first();
         $detail_sub = DB::table('subscriptions')->select('durasi')->where('id', $check_paket->paket_subs)->first();
 
@@ -76,7 +182,7 @@ class HomeController extends Controller
         if ($remaining_days < 0) {
             return response()->json('endsub', 400);
         } else {
-            DB::table('websites')->where('id', $data->idDomain)->update(['domain' => $data->domain]);
+            DB::table('websites')->where('id', $data->idDomain)->update(['domain' => $domain_name, 'jenis' => $data->jenis]);
             return response()->json('ok', 200);
         }
     }
@@ -90,8 +196,51 @@ class HomeController extends Controller
             return response()->json('ok', 400);
     }
 
-    private function add($date_str, $months)
-    {
+    public function redirect_ms($data) {
+        $id = (int)$data['id'];
+
+        $web = DB::table('websites')
+            ->select('*')
+            ->where('id', $id)
+            ->first();
+
+        // cari domain cadangan
+        $cadangan = DB::table('websites')
+                ->select('*')
+                ->where('nama_bo', $web->nama_bo)
+                ->where('jenis', 3)
+                ->first();
+
+        if ($cadangan == null) {
+            $this->bot_tele_redirect('Tidak Ada MS Cadangan');
+        } else {
+            $redirector = DB::table('redirectors')
+                ->join('websites', 'websites.id', '=', 'redirectors.domain')
+                ->select('websites.domain AS web_domain', 'websites.id AS id', 'redirectors.id AS red_id')
+                ->where('redirect', $id)
+                ->get();
+
+            foreach ($redirector as $redirect):
+                // START DEBUGGING
+                // $redirect->web_domain = 'jualcabe.pro';
+                // $cadangan->domain = 'cabemaniswkwk.com';
+                // $cadangan->id = 18;
+                // END DEBUGGING
+
+                // $page_rule_set = new Pagerule();
+                // $page_rule_info = $page_rule_set->index($redirect->web_domain, $cadangan->domain);
+                // DB::table('redirectors')->where('id', $redirector->red_id)->update(['redirect' => $cadangan->id]);
+                // DB::table('websites')->where('id', $id)->update(['jenis' => 4]);
+                // DB::table('websites')->where('id', $cadangan->id)->update(['jenis' => 1]);
+                // return response()->json("Redirector $redirect->web_domain mengarah ke $cadangan->domain.", 200);
+                $message = "Redirector $redirect->web_domain mengarah ke $cadangan->domain.";
+                $this->bot_tele_redirect($message);
+            endforeach;
+            return $cadangan->id;
+        }
+    }
+
+    private function add($date_str, $months) {
         $date = new DateTime($date_str);
 
         // We extract the day of the month as $start_day

@@ -7,34 +7,42 @@
                     <th>Domain</th>
                     <th v-if="idBO == 0">BO</th>
                     <th v-if="idBO == 0">Kontak</th>
+                    <th>Jenis Domain</th>
                     <th>Status</th>
                     <th v-if="subbed"></th>
                 </thead>
                 <tbody class="text-center">
                     <tr v-for="list in listWebsites" :key="list.id">
-                        <td class="px-1">{{ list.id }}</td>
-                        <td class="text-start px-1">{{ list.domain }}</td>
+                        <td class="px-1" style="width: 10% !important">{{ list.id }}</td>
+                        <td class="text-start px-1" style="width: 5% !important">{{ list.domain }}</td>
                         <td v-if="idBO == 0" class="px-1">{{ list.nama_bo }}</td>
                         <td v-if="idBO == 0" class="px-1">{{ list.kontak }}</td>
-                        <td style="width: 25%" v-if="subbed" class="px-1">
-                            <!-- <span v-if="list.status == 'allowed'" class="fas fa-lg fa-check text-success"></span> -->
-                            <strong v-if="list.status == 'allowed'" class="text-success">OK</strong>
-                            <!-- <span v-else-if="list.status == 'blocked'" class="fas fa-lg fa-times text-danger"></span> -->
-                            <strong v-else-if="list.status == 'blocked'" class="text-danger">Block</strong>
+                        <td class="px-1" style="width: 3% !important">
+                            <strong v-if="list.jenis == 1" class="text-success">MS Utama</strong>
+                            <strong v-else-if="list.jenis == 2" class="text-primary">Redirector</strong>
+                            <strong v-else-if="list.jenis == 3" class="text-secondary">MS Cadangan</strong>
+                            <strong v-else-if="list.jenis == 4" class="text-secondary">MS Nawala</strong>
+                            <strong v-else class="text-danger">Tidak Diketahui</strong>
+                        </td>
+                        <td v-if="subbed" class="px-1" style="width: 5% !important">
+                            <strong v-if="list.status == 'allowed'" class="text-success">AKTIF</strong>
+                            <strong v-else-if="list.status == 'blocked'" class="text-danger">NAWALA</strong>
                             <strong v-else-if="list.status == 'Invalid domain format'" class="text-danger opacity-75">Format domain salah</strong>
+                            <strong v-else-if="list.status == 'Error resolving IP address for ' + list.domain" class="text-danger opacity-75">Domain tidak ditemukan</strong>
+                            <strong v-else-if="list.status == 'backup'" class="text-secondary">BACKUP</strong>
                             <span v-else>{{ list.status }}</span>
                         </td>
-                        <td v-else>
+                        <td v-else style="width: 5%">
                             <i class="fas fa-exclamation-triangle text-danger"></i>
                         </td>
 
-                        <td class="px-0" style="width: 25%" v-if="subbed">
+                        <td class="px-0" style="width: 5% !important" v-if="subbed">
                             <!-- SUBSCRIBED -->
                             <button class="btn btn-sm py-0 px-1">
-                                <span class="fas fa-sm fa-edit text-dark" data-bs-toggle="modal" data-bs-target="#editDomain" @click="getDomainId(list.id, list.domain)"></span>
+                                <span class="fas fa-sm fa-edit text-dark" data-bs-toggle="modal" data-bs-target="#editDomain" @click="getDomainId(list.id, list.domain, list.jenis)"></span>
                             </button>
                             <button class="btn btn-sm py-0 px-1">
-                                <span class="fas fa-sm fa-trash text-danger" data-bs-toggle="modal" data-bs-target="#deleteDomain" @click="getDomainId(list.id, list.domain)"></span>
+                                <span class="fas fa-sm fa-trash text-danger" data-bs-toggle="modal" data-bs-target="#deleteDomain" @click="getDomainId(list.id, list.domain, list.jenis)"></span>
                             </button>
                         </td>
                     </tr>
@@ -70,6 +78,13 @@
                 </div>
                 <div class="modal-body">
                     <input type="text" ref="domainName" class="form-control m-0" placeholder="Contoh: namadomain.com">
+                    <br>
+                    <select ref="jenisDomain" class="form-select">
+                        <option value="0" selected>Jenis Domain</option>
+                        <option value="1">MS Utama</option>
+                        <option value="2">Redirector</option>
+                        <option value="3">MS Cadangan</option>
+                    </select>
                     <div v-if="errorAddDomain" class="alert alert-danger py-1 px-2 mt-1">
                         <small>{{ errMsg }}</small>
                     </div>
@@ -80,7 +95,7 @@
                     <small class="text-dark m-0">
                         Pastikan:
                         <ul class="m-0 ps-4">
-                            <li class="m-0">Tidak mencantumkan "http://"</li>
+                            <li class="m-0">Tidak ada kesalahan input domain.</li>
                             <li class="m-0">Alamat berupa nama domain, bukan IP</li>
                         </ul>
                     </small>
@@ -103,6 +118,13 @@
                 </div>
                 <div class="modal-body">
                     <input type="text" ref="domainNameEdit" class="form-control m-0" placeholder="Contoh: namadomain.com" :value="domainName">
+                    <br>
+                    <select ref="jenisDomainEdit" class="form-select" :value="jenisDomain">
+                        <option value="0" selected>Jenis Domain</option>
+                        <option value="1">MS Utama</option>
+                        <option value="2">Redirector</option>
+                        <option value="3">MS Cadangan</option>
+                    </select>
                     <div v-if="errorAddDomain" class="alert alert-danger py-1 px-2 mt-1">
                         <small>{{ errMsg }}</small>
                     </div>
@@ -113,7 +135,7 @@
                     <small class="text-dark m-0">
                         Pastikan:
                         <ul class="m-0 ps-4">
-                            <li class="m-0">Tidak mencantumkan "http://"</li>
+                            <li class="m-0">Tidak ada kesalahan input domain.</li>
                             <li class="m-0">Alamat berupa nama domain, bukan IP</li>
                         </ul>
                     </small>
@@ -167,6 +189,8 @@ export default {
         return {
             idBO: null,
             namaBO: null,
+            id_telegram: null,
+            telegram: null,
             subscription: null,
             errorAddDomain: false,
             errMsg: '',
@@ -174,23 +198,22 @@ export default {
             successMsg: '',
             idDomain: null,
             domainName: null,
+            jenisDomain: null,
             waktuCek: null,
             listWebsites: {},
             subbed: false,
+            domainStatus: '',
+            botContent: [],
         }
     },
 
     methods: {
         Initiate() {
             this.getSession()
-            this.getWebsites()
-            setTimeout(() => {
-                this.checkWebsites(this.listWebsites)
-            }, 5000)
 
             setInterval(() => {
-                this.checkWebsites(this.listWebsites)
-            }, 3600000);
+                this.getSession(this.listWebsites)
+            }, 600000);
         },
 
         Tambah() {
@@ -202,9 +225,13 @@ export default {
             if (this.$refs.domainName.value == '' || this.$refs.domainName.value == null) {
                 this.errorAddDomain = true
                 this.errMsg = 'Nama domain wajib diisi.'
+            } else if (this.$refs.jenisDomain.value == '' || this.$refs.jenisDomain.value == null) {
+                this.errorAddDomain = true
+                this.errMsg = 'Jenis domain wajib diisi.'
             } else {
                 let data = {
                     domain: this.$refs.domainName.value,
+                    jenis: this.$refs.jenisDomain.value,
                     namaBO: this.idBO
                 }
                 axios
@@ -243,9 +270,13 @@ export default {
             if (this.$refs.domainNameEdit.value == '' || this.$refs.domainNameEdit.value == null) {
                 this.errorAddDomain = true
                 this.errMsg = 'Nama domain wajib diisi.'
+            } else if (this.$refs.jenisDomainEdit.value == '' || this.$refs.jenisDomainEdit.value == null) {
+                this.errorAddDomain = true
+                this.errMsg = 'Jenis domain wajib diisi.'
             } else {
                 let data = {
                     domain: this.$refs.domainNameEdit.value,
+                    jenis: this.$refs.jenisDomainEdit.value,
                     idDomain: this.idDomain,
                     namaBO: this.idBO
                 }
@@ -275,9 +306,10 @@ export default {
 
         },
 
-        getDomainId(id, domain) {
+        getDomainId(id, domain, jenis) {
             this.domainName = domain
             this.idDomain = id
+            this.jenisDomain = jenis
         },
 
         Hapus(id) {
@@ -298,6 +330,8 @@ export default {
             .then((res) => {
                 this.idBO = res.data.id_bo
                 this.namaBO = res.data.nama_bo
+                this.id_telegram = res.data.id_telegram
+                this.telegram = res.data.telegram
 
                 let date = new Date(res.data.subscription)
                 let subEnd = new Date(date.setMonth(date.getMonth() + 1))
@@ -305,6 +339,9 @@ export default {
                 this.subscription = localEnd.substring(0, 10)
                 let today = new Date()
                 this.checkSubs(today, subEnd)
+            })
+            .finally(() => {
+                this.getWebsites()
             })
         },
 
@@ -320,24 +357,29 @@ export default {
             .get('/get_websites')
             .then(res => {
                 this.listWebsites = res.data
-                this.listWebsites.forEach(data => {
+                this.listWebsites.forEach((data, index) => {
                     const text = "" + data.id + ""
                     data.id = text.padStart(4, '0')
                     data.status = 'Check...'
                 })
             })
+            .catch((err) => {
+                console.log(err.response.data)
+            })
             .finally(() => {
                 this.checkWebsites(this.listWebsites)
-                this.botTeleCheck(this.listWebsites)
             })
         },
 
         checkWebsites(list) {
+            // this.botContent = []
+            var i = list.length
             list.forEach((data, index) => {
-                let domain = { domain: data.domain }
+                let domain = { domain: data }
                 axios
-                .post('/fetch_data', domain)
+                .post('/fetch_data', {data: JSON.stringify(domain)})
                 .then(res => {
+                    console.log(res.data)
                     if (res.data.status != undefined)
                         this.listWebsites[index].status = res.data.status
                     else
@@ -346,8 +388,33 @@ export default {
                 .catch(err => {
                     console.log(err.response)
                 })
+                .finally(() => {
+                    this.getLastUpdate()
+
+                    // if (data.status == 'allowed')
+                    //     this.botContent.push({
+                    //         'domain': data.domain,
+                    //         'status': 'aktif'
+                    //     }),
+                    //     this.domainStatus = 'aktif'
+                    // else if (data.status == 'blocked')
+                    //     this.botContent.push({
+                    //         'domain': data.domain,
+                    //         'status': 'nawala'
+                    //     }),
+                    //     this.domainStatus = 'nawala',
+                    //     this.redirectWeb(data)
+                    // else
+                    //     this.domainStatus = 'error'
+
+                    i -= 1
+                    if (i == 0) {
+                        console.log(list)
+                        if (this.id_telegram != null && this.telegram != 0 && this.subbed == true)
+                            this.botTeleCheck(list)
+                    }
+                })
             })
-            this.getLastUpdate()
         },
 
         getLastUpdate() {
@@ -357,9 +424,9 @@ export default {
         },
 
         botTeleCheck(list) {
-            let domain = { domain: 'worldhistoryproject.org' }
+            let content = list
             axios
-            .post('/bot_check', domain)
+            .post('/bot_check', { content })
             .then(res => {
                 console.log(res.data)
             })
@@ -367,6 +434,33 @@ export default {
                 console.log(err.response)
             })
         },
+
+        // botTeleRedirect(botContent) {
+        //     let content = botContent
+        //     axios
+        //     .post('/bot_check_redirect', { content })
+        //     .then(res => {
+        //         console.log(res.data)
+        //     })
+        //     .catch(err => {
+        //         console.log(err.response)
+        //     })
+        // },
+
+        // redirectWeb(data) {
+        //     let domain = { data: data }
+        //     axios
+        //     .post('/redirect', {data: JSON.stringify(domain)})
+        //     .then(res => {
+        //         console.log(res)
+        //         if (this.id_telegram != null && this.telegram != 0 && this.subbed == true)
+        //             this.botTeleRedirect(res.data)
+        //     })
+        //     .catch(err => {
+        //         console.log(err.response)
+        //         return err.response.data
+        //     })
+        // },
     },
 
     mounted() {

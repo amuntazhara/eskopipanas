@@ -45,7 +45,10 @@ export default {
                 this.logStatus = 'OK'
                 this.logMessage = 'Login berhasil. Mengarahkan ke Dashboard...'
                 setTimeout(() => {
-                    window.location.href="/"
+                    if (res.data == 0)
+                        window.location.href="/"
+                    else
+                        window.location.href="/seofreedom"
                 }, 1500);
                 // console.log(res.data)
             })

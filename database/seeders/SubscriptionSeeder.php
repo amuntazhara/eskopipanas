@@ -15,28 +15,28 @@ class SubscriptionSeeder extends Seeder
     {
         DB::table('subscriptions')->insert([
             'nama_paket' => 'Paket 1',
-            'limit_domain' => 3,
+            'limit_domain' => 4,
             'durasi' => 1,
             'telegram' => 0,
             'harga' => 500000,
         ]);
         DB::table('subscriptions')->insert([
             'nama_paket' => 'Paket 2',
-            'limit_domain' => 6,
+            'limit_domain' => 4,
             'durasi' => 1,
             'telegram' => 1,
             'harga' => 1000000,
         ]);
         DB::table('subscriptions')->insert([
             'nama_paket' => 'Paket 3',
-            'limit_domain' => 10,
+            'limit_domain' => 8,
             'durasi' => 1,
             'telegram' => 1,
             'harga' => 1500000,
         ]);
         DB::table('subscriptions')->insert([
             'nama_paket' => 'Paket 4',
-            'limit_domain' => 10,
+            'limit_domain' => 8,
             'durasi' => 3,
             'telegram' => 1,
             'harga' => 3000000,
