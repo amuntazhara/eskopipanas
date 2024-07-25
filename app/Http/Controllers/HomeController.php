@@ -90,7 +90,7 @@ class HomeController extends Controller
     }
 
     public function bot_message($data) {
-        $message = "\n<b>===== NAWALA INFO =====</b>\n";
+        $message = "<b>NAWALA INFO</b>\n";
 
         $message .= "\n<b>MS UTAMA:</b>\n";
         foreach ($data as $key):
@@ -142,16 +142,14 @@ class HomeController extends Controller
                 }
                 if (isset($cadangan_dipakai)) {
                     if ((int)$key['id'] == $cadangan_dipakai)
-                        $message .= $status . "<i><s>{$key['domain']}</s></i>\n";
+                        $message .= "$status<i><s>{$key['domain']}</s></i>\n";
                     else
-                        $message .= $status . "{$key['domain']}\n";
+                        $message .= "$status{$key['domain']}\n";
                 } else {
-                    $message .= $status . "{$key['domain']}\n";
+                    $message .= "$status{$key['domain']}\n";
                 }
             }
         endforeach;
-
-        $message .= "\n======================";
         return $message;
     }
 
