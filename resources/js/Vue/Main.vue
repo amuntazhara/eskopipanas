@@ -380,6 +380,7 @@ export default {
                 .post('/fetch_data', {data: JSON.stringify(domain)})
                 .then(res => {
                     console.log(res.data)
+                    console.log(res.data.status)
                     if (res.data.status != undefined)
                         this.listWebsites[index].status = res.data.status
                     else

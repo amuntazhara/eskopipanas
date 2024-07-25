@@ -20,21 +20,24 @@ class HomeController extends Controller
         $data = $data->domain;
         $result = "";
         // // $url = "https://trustpositif.kominfo.go.id/Rest_server/getrecordsname_home";
-        if ($data->jenis != 3) {
             $url = "https://indiwtf.com/api/check?domain=$data->domain&token=$token";
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             $res = curl_exec($curl);
             curl_close($curl);
+        // if ($data->jenis != 3) {
             $result = json_decode($res);
-        } else {
-            $data = new stdClass();
-            $status = new stdClass();
-            $status->status = "backup";
-            $data->data = $status;
-            $result = $data->data;
-        }
+        // } else {
+            // $res = json_decode($res);
+            // $data = new stdClass();
+            // $status = new stdClass();
+            // $data = $res->data;
+            // $res->status = "backup";
+            // $status->status = "backup";
+            // $data->data = $status;
+            // $result = $res;
+        // }
         return response()->json($result, 200);
     }
 
@@ -127,13 +130,23 @@ class HomeController extends Controller
         $message .= "\n<b>MS CADANGAN:</b>\n";
         foreach ($data as $key) :
             if ($key['jenis'] == 3) {
+                if ($key['status'] == 'allowed') {
+                    $status = '✅ ';
+                } else if ($key['status'] == 'blocked') {
+                    $status = '❌ ';
+                    $this->nawala_redirector($key);
+                } else if ($key['status'] == 'backup') {
+                    $status = '';
+                } else {
+                    $status = '⚠️ ';
+                }
                 if (isset($cadangan_dipakai)) {
                     if ((int)$key['id'] == $cadangan_dipakai)
-                        $message .= "<i><s>{$key['domain']}</s></i>\n";
+                        $message .= $status . "<i><s>{$key['domain']}</s></i>\n";
                     else
-                        $message .= "{$key['domain']}\n";
+                        $message .= $status . "{$key['domain']}\n";
                 } else {
-                    $message .= "{$key['domain']}\n";
+                    $message .= $status . "{$key['domain']}\n";
                 }
             }
         endforeach;
@@ -227,11 +240,11 @@ class HomeController extends Controller
                 // $cadangan->id = 18;
                 // END DEBUGGING
 
-                // $page_rule_set = new Pagerule();
-                // $page_rule_info = $page_rule_set->index($redirect->web_domain, $cadangan->domain);
-                // DB::table('redirectors')->where('id', $redirector->red_id)->update(['redirect' => $cadangan->id]);
-                // DB::table('websites')->where('id', $id)->update(['jenis' => 4]);
-                // DB::table('websites')->where('id', $cadangan->id)->update(['jenis' => 1]);
+                $page_rule_set = new Pagerule();
+                $page_rule_info = $page_rule_set->index($redirect->web_domain, $cadangan->domain);
+                DB::table('redirectors')->where('id', $redirect->red_id)->update(['redirect' => $cadangan->id]);
+                DB::table('websites')->where('id', $id)->update(['jenis' => 4]);
+                DB::table('websites')->where('id', $cadangan->id)->update(['jenis' => 1]);
                 // return response()->json("Redirector $redirect->web_domain mengarah ke $cadangan->domain.", 200);
                 $message = "Redirector $redirect->web_domain mengarah ke $cadangan->domain.";
                 $this->bot_tele_redirect($message);
