@@ -381,10 +381,13 @@ export default {
                 .then(res => {
                     console.log(res.data)
                     console.log(res.data.status)
-                    if (res.data.status != undefined)
-                        this.listWebsites[index].status = res.data.status
+                    // if (res.data.status != undefined)
+                    if (res.data.includes('Blocked'))
+                        // this.listWebsites[index].status = res.data.status
+                        this.listWebsites[index].status = 'blocked'
                     else
-                        this.listWebsites[index].status = res.data.error
+                        // this.listWebsites[index].status = res.data.error
+                        this.listWebsites[index].status = 'allowed'
                 })
                 .catch(err => {
                     console.log(err.response)

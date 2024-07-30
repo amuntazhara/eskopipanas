@@ -20,14 +20,15 @@ class HomeController extends Controller
         $data = $data->domain;
         $result = "";
         // // $url = "https://trustpositif.kominfo.go.id/Rest_server/getrecordsname_home";
-            $url = "https://indiwtf.com/api/check?domain=$data->domain&token=$token";
-            $curl = curl_init($url);
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            $res = curl_exec($curl);
-            curl_close($curl);
+        // $url = "https://indiwtf.com/api/check?domain=$data->domain&token=$token";
+        // $curl = curl_init($url);
+        // curl_setopt($curl, CURLOPT_URL, $url);
+        // curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        // $res = curl_exec($curl);
+        // curl_close($curl);
         // if ($data->jenis != 3) {
-            $result = json_decode($res);
+            $result = shell_exec('curl -X POST -d "name=' . $data->domain . '" https://trustpositif.kominfo.go.id/Rest_server/getrecordsname');
+            // $result = json_decode($res);
         // } else {
             // $res = json_decode($res);
             // $data = new stdClass();
@@ -118,7 +119,7 @@ class HomeController extends Controller
                     $status = '✅ ';
                 } else if ($key['status'] == 'blocked') {
                     $status = '❌ ';
-                    $this->nawala_redirector($key);
+                    $this->redirect_ms($key);
                 } else if ($key['status'] == 'backup') {
                     $status = '';
                 } else {
@@ -134,7 +135,7 @@ class HomeController extends Controller
                     $status = '✅ ';
                 } else if ($key['status'] == 'blocked') {
                     $status = '❌ ';
-                    $this->nawala_redirector($key);
+                    $this->redirect_ms($key);
                 } else if ($key['status'] == 'backup') {
                     $status = '';
                 } else {
