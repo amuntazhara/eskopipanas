@@ -91,8 +91,9 @@ class HomeController extends Controller
     }
 
     public function bot_message($data) {
-        $message = "<b>NAWALA INFO</b>\n";
+        $nawala_ms = 0;
 
+        $message = "<b>NAWALA INFO</b>\n";
         $message .= "\n<b>MS UTAMA:</b>\n";
         foreach ($data as $key):
             if ($key['jenis'] == 1) {
@@ -103,6 +104,7 @@ class HomeController extends Controller
                     $status = '✅ ';
                 } else if ($key['status'] == 'blocked') {
                     $status = '❌ ';
+                    $nawala_ms = 1;
                     $cadangan_dipakai = $this->redirect_ms($key);
                 } else if ($key['status'] == 'backup') {
                     $status = '';
@@ -119,7 +121,7 @@ class HomeController extends Controller
                     $status = '✅ ';
                 } else if ($key['status'] == 'blocked') {
                     $status = '❌ ';
-                    $this->redirect_ms($key);
+                    // $this->redirect_ms($key);
                 } else if ($key['status'] == 'backup') {
                     $status = '';
                 } else {
@@ -135,7 +137,7 @@ class HomeController extends Controller
                     $status = '✅ ';
                 } else if ($key['status'] == 'blocked') {
                     $status = '❌ ';
-                    $this->redirect_ms($key);
+                    // $this->redirect_ms($key);
                 } else if ($key['status'] == 'backup') {
                     $status = '';
                 } else {
@@ -151,6 +153,9 @@ class HomeController extends Controller
                 }
             }
         endforeach;
+
+        if ($nawala_ms != 0)
+            $message .= "\n@mntzhra @Kyoshi123\n";
         return $message;
     }
 
